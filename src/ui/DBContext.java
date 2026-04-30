@@ -21,3 +21,6 @@ public class DBContext {
     }
 }
 //java -cp ".;lib/mssql-jdbc-13.4.0.jre11.jar" ui/page_login.java
+
+//javac -cp ".;lib\mssql-jdbc-13.4.0.jre11.jar" ui\DBContext.java ui\page_login.java
+//java --% -Djava.library.path=lib -cp .;lib\mssql-jdbc-13.4.0.jre11.jar ui.page_login
