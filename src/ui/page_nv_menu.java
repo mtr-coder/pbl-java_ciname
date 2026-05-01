@@ -79,7 +79,7 @@ public class page_nv_menu extends JFrame implements ActionListener {
         add(pn_all);
 
         setResizable(false);
-        setSize(600, 450);
+        setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
     }
