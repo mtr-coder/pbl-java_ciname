@@ -5,6 +5,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.*;
+import java.util.HashSet;
+import java.util.Set;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
@@ -13,9 +15,9 @@ public class page_ql_nhanvien extends JFrame implements ActionListener {
     public JTextField txt_username, txt_password, txt_role, txt_name, txt_phone;
     public JRadioButton rb_all, rb_username, rb_role, rb_name, rb_phone;
     public ButtonGroup searchGroup;
-    public JList<String> list_users;
+    public JComboBox<String> list_users;
     public JButton btn_newUser, btn_updateUser, btn_deleteUser, btn_refresh, btn_undo;
-    DefaultListModel<String> userListModel;
+    DefaultComboBoxModel<String> userListModel;
     public JTable tb_users;
     private final DefaultTableModel tableModel;
     public JPanel pn_title, pn_body1, pn_body2, pn_body3, pn_footer, pn_all;
@@ -48,12 +50,9 @@ public class page_ql_nhanvien extends JFrame implements ActionListener {
         searchGroup.add(rb_role);
         searchGroup.add(rb_name);
         searchGroup.add(rb_phone);
-        userListModel = new DefaultListModel<>();
-        list_users = new JList<>(userListModel);
-        list_users.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        list_users.setVisibleRowCount(1);
-        JScrollPane listScrollPane = new JScrollPane(list_users);
-        listScrollPane.setPreferredSize(new Dimension(100, 20));
+        userListModel = new DefaultComboBoxModel<>();
+        list_users = new JComboBox<>(userListModel);
+        list_users.setPreferredSize(new Dimension(100, 20));
         btn_newUser = new JButton("Thêm");
         btn_updateUser = new JButton("Sửa");
         btn_deleteUser = new JButton("Xóa");
@@ -101,7 +100,7 @@ public class page_ql_nhanvien extends JFrame implements ActionListener {
         pn_body2.add(rb_role);
         pn_body2.add(rb_name);
         pn_body2.add(rb_phone);
-        pn_body2.add(listScrollPane);
+        pn_body2.add(list_users);
         pn_body3.add(btn_newUser);
         pn_body3.add(btn_updateUser);
         pn_body3.add(btn_deleteUser);
@@ -126,10 +125,8 @@ public class page_ql_nhanvien extends JFrame implements ActionListener {
         btn_deleteUser.addActionListener(this);
         btn_undo.addActionListener(this);
 
-        list_users.addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                handleListSelection();
-            }
+        list_users.addActionListener(e -> {
+            handleListSelection();
         });
 
         tb_users.addMouseListener(new MouseAdapter() {
@@ -151,7 +148,7 @@ public class page_ql_nhanvien extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         Object src = e.getSource();
         if (src == rb_all) {
-            userListModel.clear();
+            userListModel.removeAllElements();
             loadAllUsers();
         } else if (src == rb_username) {
             loadListByColumn("username");
@@ -168,7 +165,7 @@ public class page_ql_nhanvien extends JFrame implements ActionListener {
             txt_name.setText("");
             txt_phone.setText("");
             rb_all.setSelected(true);
-            userListModel.clear();
+            userListModel.removeAllElements();
             loadAllUsers();
         } else if (src == btn_newUser) {
             handleAdd();
@@ -184,7 +181,7 @@ public class page_ql_nhanvien extends JFrame implements ActionListener {
     }
 
     private void handleListSelection() {
-        String selected = list_users.getSelectedValue();
+        String selected = (String) list_users.getSelectedItem();
         if (selected == null) {
             return;
         }
@@ -224,15 +221,19 @@ public class page_ql_nhanvien extends JFrame implements ActionListener {
     }
 
     private void loadListByColumn(String column) {
-        userListModel.clear();
-        String sql = "SELECT " + column + " FROM users ORDER BY " + column;
+        userListModel.removeAllElements();
+        String sql = "SELECT DISTINCT " + column + " FROM users ORDER BY " + column;
         try (Connection con = new DBContext().getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
+            Set<String> seen = new HashSet<>();
             while (rs.next()) {
                 String value = rs.getString(1);
-                if (value != null && !value.isBlank()) {
-                    userListModel.addElement(value);
+                if (value != null) {
+                    String normalized = value.trim();
+                    if (!normalized.isEmpty() && seen.add(normalized.toLowerCase())) {
+                        userListModel.addElement(normalized);
+                    }
                 }
             }
         } catch (Exception ex) {
@@ -367,7 +368,7 @@ public class page_ql_nhanvien extends JFrame implements ActionListener {
         txt_name.setText("");
         txt_phone.setText("");
         rb_all.setSelected(true);
-        userListModel.clear();
+        userListModel.removeAllElements();
         loadAllUsers();
     }
 

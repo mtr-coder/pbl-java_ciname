@@ -13,9 +13,9 @@ public class page_ql_phim extends JFrame implements ActionListener {
     public JTextField txt_title, txt_duration, txt_genre;
     public JRadioButton rb_all, rb_title, rb_genre;
     public ButtonGroup searchGroup;
-    public JList<String> list_movies;
+    public JComboBox<String> list_movies;
     public JButton btn_newMovie, btn_updateMovie, btn_deleteMovie, btn_refresh, btn_undo;
-    DefaultListModel<String> movieListModel;
+    DefaultComboBoxModel<String> movieListModel;
     public JTable tb_movies;
     private final DefaultTableModel tableModel;
     public JPanel pn_title, pn_body1, pn_body2, pn_body3, pn_footer, pn_all;
@@ -40,12 +40,9 @@ public class page_ql_phim extends JFrame implements ActionListener {
         searchGroup.add(rb_all);
         searchGroup.add(rb_title);
         searchGroup.add(rb_genre);
-        movieListModel = new DefaultListModel<>();
-        list_movies = new JList<>(movieListModel);
-        list_movies.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        list_movies.setVisibleRowCount(1);
-        JScrollPane listScrollPane = new JScrollPane(list_movies);
-        listScrollPane.setPreferredSize(new Dimension(100, 20));
+        movieListModel = new DefaultComboBoxModel<>();
+        list_movies = new JComboBox<>(movieListModel);
+        list_movies.setPreferredSize(new Dimension(100, 20));
         btn_newMovie = new JButton("Thêm");
         btn_updateMovie = new JButton("Sửa");
         btn_deleteMovie = new JButton("Xóa");
@@ -87,7 +84,7 @@ public class page_ql_phim extends JFrame implements ActionListener {
         pn_body2.add(rb_all);
         pn_body2.add(rb_title);
         pn_body2.add(rb_genre);
-        pn_body2.add(listScrollPane);
+        pn_body2.add(list_movies);
         pn_body3.add(btn_newMovie);
         pn_body3.add(btn_updateMovie);
         pn_body3.add(btn_deleteMovie);
@@ -110,10 +107,8 @@ public class page_ql_phim extends JFrame implements ActionListener {
         btn_deleteMovie.addActionListener(this);
         btn_undo.addActionListener(this);
 
-        list_movies.addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                handleListSelection();
-            }
+        list_movies.addActionListener(e -> {
+            handleListSelection();
         });
 
         tb_movies.addMouseListener(new MouseAdapter() {
@@ -135,7 +130,7 @@ public class page_ql_phim extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         Object src = e.getSource();
         if (src == rb_all) {
-            movieListModel.clear();
+            movieListModel.removeAllElements();
             loadAllMovies();
         } else if (src == rb_title) {
             loadListByColumn("title");
@@ -146,7 +141,7 @@ public class page_ql_phim extends JFrame implements ActionListener {
             txt_duration.setText("");
             txt_genre.setText("");
             rb_all.setSelected(true);
-            movieListModel.clear();
+            movieListModel.removeAllElements();
             loadAllMovies();
         } else if (src == btn_newMovie) {
             handleAdd();
@@ -162,7 +157,7 @@ public class page_ql_phim extends JFrame implements ActionListener {
     }
 
     private void handleListSelection() {
-        String selected = list_movies.getSelectedValue();
+        String selected = (String) list_movies.getSelectedItem();
         if (selected == null) {
             return;
         }
@@ -194,7 +189,7 @@ public class page_ql_phim extends JFrame implements ActionListener {
     }
 
     private void loadListByColumn(String column) {
-        movieListModel.clear();
+        movieListModel.removeAllElements();
         String sql = "SELECT " + column + " FROM movies ORDER BY " + column;
         try (Connection con = new DBContext().getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
@@ -335,7 +330,7 @@ public class page_ql_phim extends JFrame implements ActionListener {
         txt_duration.setText("");
         txt_genre.setText("");
         rb_all.setSelected(true);
-        movieListModel.clear();
+        movieListModel.removeAllElements();
         loadAllMovies();
     }
 
