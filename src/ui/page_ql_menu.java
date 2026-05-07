@@ -96,7 +96,7 @@ public class page_ql_menu extends JFrame implements ActionListener {
         add(pn_all);
 
         setResizable(false);
-        setSize(600, 450);
+        setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
     }
@@ -124,7 +124,9 @@ public class page_ql_menu extends JFrame implements ActionListener {
             page_ql_phongchieu qlp = new page_ql_phongchieu();
             qlp.setVisible(true);
         } else if (e.getSource() == btn_thongke) {
-            JOptionPane.showMessageDialog(this, "Trang thống kê");
+            this.dispose();
+            page_ql_thongke qltt = new page_ql_thongke("Thống kê doanh thu");
+            qltt.setVisible(true);
         }
     }
 

@@ -20,6 +20,7 @@ public class page_ql_phongchieu extends JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(null); 
+        UI();
     }
 
     public void UI() {

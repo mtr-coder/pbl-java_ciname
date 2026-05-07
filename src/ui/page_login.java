@@ -42,13 +42,23 @@ public class page_login extends JFrame implements ActionListener {
         txt_pass.setFont(fieldFont);
         txt_pass.setPreferredSize(new Dimension(200, 32));
 
-        pn_body.setLayout(new GridLayout(2, 2, 12, 14));
-        pn_body.setBorder(BorderFactory.createEmptyBorder(16, 40, 20, 40));
+        JPanel row1 = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        row1.setBackground(Color.WHITE);
+        lb_user.setPreferredSize(new Dimension(80, 32));
+        row1.add(lb_user);
+        row1.add(txt_user);
+
+        JPanel row2 = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        row2.setBackground(Color.WHITE);
+        lb_pass.setPreferredSize(new Dimension(80, 32));
+        row2.add(lb_pass);
+        row2.add(txt_pass);
+
+        pn_body.setLayout(new BoxLayout(pn_body, BoxLayout.Y_AXIS));
         pn_body.setBackground(Color.WHITE);
-        pn_body.add(lb_user);
-        pn_body.add(txt_user);
-        pn_body.add(lb_pass);
-        pn_body.add(txt_pass);
+        pn_body.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+        pn_body.add(row1);
+        pn_body.add(row2);
 
         btn_login.setFont(new Font("Arial", Font.BOLD, 14));
         btn_login.setBackground(new Color(255, 140, 0));
@@ -68,7 +78,7 @@ public class page_login extends JFrame implements ActionListener {
         pn_all.add(pn_footer, BorderLayout.SOUTH);
         add(pn_all);
         setResizable(false);
-        setSize(460, 280);
+        setSize(500, 300);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
     }

@@ -132,11 +132,14 @@ public class page_ql_thongke extends JFrame {
 
     public page_ql_thongke(String st) {
         super(st);
+        setSize(800, 600);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         UI();
     }
 
     public static void main(String[] args) {
         try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); } catch (Exception e) {}
-        new page_ql_thongke("Quản Lý Thống Kê Doanh Thu");
+        new page_ql_thongke("Quản Lý Thống Kê Doanh Thu").setVisible(true);
     }
 }

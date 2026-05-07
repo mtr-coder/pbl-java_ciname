@@ -8,7 +8,6 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.*;
-import java.util.Vector;
 
 public class page_nv_danhsachphim extends JFrame implements ActionListener {
     private JTable movieTable, scheduleTable;

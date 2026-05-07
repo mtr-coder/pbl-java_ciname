@@ -92,7 +92,7 @@ public class page_nv_menu extends JFrame implements ActionListener {
             login.setVisible(true);
         } else if (e.getSource() == btn_danhsachphim) {
             this.dispose();
-            page_nv_danhsachphim dsp = new page_nv_danhsachphim();
+            page_nv_danhsachphim dsp = new page_nv_danhsachphim("Danh sách phim");
             dsp.setVisible(true);
         } else if (e.getSource() == btn_banve) {
             this.dispose();

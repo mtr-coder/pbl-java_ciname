@@ -16,7 +16,8 @@ public class page_nv_suatchieu extends JFrame implements ActionListener {
     public JButton btn_trolai, btn_luu;
     public JTable tb_movies;
     public JComboBox<String> cbo_phong, cbo_gio;
-    public JLabel lb_phim, lb_phong, lb_gio;
+    public JLabel lb_phim, lb_phong, lb_gio, lb_ngay;
+    public JComboBox<String> cbo_day, cbo_month, cbo_year;
     public JPanel pn_all, pn_tille, pn_trai, pn_phai;
     private Connection con;
     public page_nv_suatchieu() {
@@ -64,7 +65,7 @@ public class page_nv_suatchieu extends JFrame implements ActionListener {
                                 int m = currentMinutes % 60;
                                 String timeStr = String.format("%02d:%02d", h, m);
                                 cbo_gio.addItem(timeStr);
-                                currentMinutes += duration;
+                                currentMinutes += (duration + 15);
                             }
                         }
                     } catch (Exception ex) {
@@ -75,6 +76,20 @@ public class page_nv_suatchieu extends JFrame implements ActionListener {
         });
 
         lb_phim = new JLabel("Danh sách phim:");
+        lb_ngay = new JLabel("Ngày chiếu:");
+        
+        cbo_day = new JComboBox<>();
+        for (int i = 1; i <= 31; i++) cbo_day.addItem(String.format("%02d", i));
+        cbo_month = new JComboBox<>();
+        for (int i = 1; i <= 12; i++) cbo_month.addItem(String.format("%02d", i));
+        cbo_year = new JComboBox<>();
+        int currentYear = java.time.LocalDate.now().getYear();
+        for (int i = currentYear; i <= currentYear + 2; i++) cbo_year.addItem(String.valueOf(i));
+        
+        java.time.LocalDate today = java.time.LocalDate.now();
+        cbo_day.setSelectedItem(String.format("%02d", today.getDayOfMonth()));
+        cbo_month.setSelectedItem(String.format("%02d", today.getMonthValue()));
+        cbo_year.setSelectedItem(String.valueOf(today.getYear()));
         lb_phong = new JLabel("Phòng chiếu:");
         lb_gio = new JLabel("Giờ chiếu:");
         cbo_phong = new JComboBox<>();
@@ -101,7 +116,11 @@ public class page_nv_suatchieu extends JFrame implements ActionListener {
         pn_trai.add(lb_phim, BorderLayout.NORTH); 
         pn_trai.add(new JScrollPane(tb_movies), BorderLayout.CENTER);
 
-        pn_phai = new JPanel(new GridLayout(3, 2, 10, 15));
+        JPanel pn_date = new JPanel(new GridLayout(1, 3, 5, 0));
+        pn_date.add(cbo_day); pn_date.add(cbo_month); pn_date.add(cbo_year);
+
+        pn_phai = new JPanel(new GridLayout(4, 2, 10, 15));
+        pn_phai.add(lb_ngay); pn_phai.add(pn_date);
         pn_phai.add(lb_phong); pn_phai.add(cbo_phong);
         pn_phai.add(lb_gio); pn_phai.add(cbo_gio);
         
@@ -162,20 +181,36 @@ public class page_nv_suatchieu extends JFrame implements ActionListener {
                     return;
                 }
                 if (cbo_phong.getSelectedItem() == null || cbo_gio.getSelectedItem() == null) {
-                    JOptionPane.showMessageDialog(this, "Vui lòng chọn phòng và giờ chiếu!");
+                    JOptionPane.showMessageDialog(this, "Vui lòng nhập ngày, chọn phòng và giờ chiếu!");
                     return;
                 }
                 
+                String d = cbo_day.getSelectedItem().toString();
+                String m = cbo_month.getSelectedItem().toString();
+                String y = cbo_year.getSelectedItem().toString();
+                String dateStr = y + "-" + m + "-" + d; // format YYYY-MM-DD
+                
+                try {
+                    java.time.LocalDate.parse(dateStr);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Ngày chiếu không hợp lệ (Ví dụ tháng 2 không có ngày 30)!");
+                    return;
+                }
+
                 String movieTitle = tb_movies.getValueAt(selectedRow, 0).toString();
                 String roomName = cbo_phong.getSelectedItem().toString();
                 String timeStr = cbo_gio.getSelectedItem().toString();
-                String fullTime = java.time.LocalDate.now().toString() + " " + timeStr + ":00";
+                String fullTime = dateStr + " " + timeStr + ":00";
                 
                 int movieId = -1;
-                PreparedStatement psM = con.prepareStatement("SELECT id FROM movies WHERE title = ?");
+                int durationNew = 0;
+                PreparedStatement psM = con.prepareStatement("SELECT id, duration FROM movies WHERE title = ?");
                 psM.setString(1, movieTitle);
                 ResultSet rsM = psM.executeQuery();
-                if (rsM.next()) movieId = rsM.getInt("id");
+                if (rsM.next()) {
+                    movieId = rsM.getInt("id");
+                    durationNew = rsM.getInt("duration");
+                }
 
                 int roomId = -1;
                 PreparedStatement psR = con.prepareStatement("SELECT id FROM rooms WHERE name = ?");
@@ -184,6 +219,34 @@ public class page_nv_suatchieu extends JFrame implements ActionListener {
                 if (rsR.next()) roomId = rsR.getInt("id");
 
                 if (movieId != -1 && roomId != -1) {
+                    java.time.LocalDateTime newStart = java.time.LocalDateTime.parse(dateStr + "T" + timeStr + ":00");
+                    java.time.LocalDateTime newEnd = newStart.plusMinutes(durationNew + 15);
+                    
+                    boolean hasOverlap = false;
+                    String sqlCheck = "SELECT st.start_time, m.duration FROM showtimes st JOIN movies m ON st.movie_id = m.id WHERE st.room_id = ?";
+                    PreparedStatement psCheck = con.prepareStatement(sqlCheck);
+                    psCheck.setInt(1, roomId);
+                    ResultSet rsCheck = psCheck.executeQuery();
+                    while (rsCheck.next()) {
+                        java.sql.Timestamp existingTs = rsCheck.getTimestamp("start_time");
+                        if (existingTs == null) continue;
+                        java.time.LocalDateTime existingStart = existingTs.toLocalDateTime();
+                        if (!existingStart.toLocalDate().toString().equals(dateStr)) continue;
+                        
+                        int existingDuration = rsCheck.getInt("duration");
+                        java.time.LocalDateTime existingEnd = existingStart.plusMinutes(existingDuration + 15);
+                        
+                        if (newStart.isBefore(existingEnd) && newEnd.isAfter(existingStart)) {
+                            hasOverlap = true;
+                            break;
+                        }
+                    }
+                    
+                    if (hasOverlap) {
+                        JOptionPane.showMessageDialog(this, "Phòng chiếu đã có lịch bận vào khoảng thời gian này!");
+                        return;
+                    }
+
                     String sql = "INSERT INTO showtimes (movie_id, room_id, start_time) VALUES (?, ?, ?)";
                     PreparedStatement ps = con.prepareStatement(sql);
                     ps.setInt(1, movieId);
@@ -192,8 +255,9 @@ public class page_nv_suatchieu extends JFrame implements ActionListener {
                     ps.executeUpdate();
                     
                     JOptionPane.showMessageDialog(this, "Lưu suất chiếu thành công!");
-                    dispose();
-                    new page_nv_suatchieu().setVisible(true);
+                    tb_movies.clearSelection();
+                    cbo_phong.removeAllItems();
+                    cbo_gio.removeAllItems();
                 } else {
                     JOptionPane.showMessageDialog(this, "Không tìm thấy thông tin phim hoặc phòng hợp lệ!");
                 }
