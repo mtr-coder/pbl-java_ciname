@@ -31,7 +31,8 @@ public class page_nv_danhsachphim extends JFrame implements ActionListener {
         JLabel lb1 = new JLabel("Tên phim:");
         txtSearch = new JTextField(15);
         JLabel lb2 = new JLabel("Thể loại:");
-        cbGenre = new JComboBox<>(new String[]{"Tất cả", "Action", "Comedy", "Horror", "Drama", "Sci-Fi"});
+        cbGenre = new JComboBox<>();
+        loadGenres();
         btnSearch = new JButton("Tìm kiếm");
         btnShowAll = new JButton("Tất cả phim");
         
@@ -166,6 +167,20 @@ public class page_nv_danhsachphim extends JFrame implements ActionListener {
             JOptionPane.showMessageDialog(this, "ERROR! " + e.getMessage());
         }
     }
+    private void loadGenres() {
+    cbGenre.removeAllItems();
+    cbGenre.addItem("Tất cả");
+    String sql = "SELECT DISTINCT genre FROM movies WHERE genre IS NOT NULL AND genre <> ''";
+    try (Connection conn = dbContext.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+        while (rs.next()) {
+            cbGenre.addItem(rs.getString("genre"));
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
 
     public page_nv_danhsachphim(String st) {
         super(st);
