@@ -14,7 +14,7 @@ public class page_ql_suatchieu extends JFrame {
     private JTextField txtId;
     private JSpinner spDate, spTime;
     private JComboBox<ComboItem> cbRoom, cbMovie;
-    private JButton btnAdd, btnEdit, btnDelete, btnRefresh;
+    private JButton btnAdd, btnEdit, btnDelete, btnRefresh, btnBack;
 
     // Lớp hỗ trợ lưu ID và Tên cho ComboBox
     class ComboItem {
@@ -125,6 +125,10 @@ public class page_ql_suatchieu extends JFrame {
         btnRefresh.setBounds(xForm, yForm + 290, 280, 30);
         add(btnRefresh);
 
+        btnBack = new JButton("Quay lại");
+        btnBack.setBounds(xForm, yForm + 330, 280, 30);
+        add(btnBack);
+
         table.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -169,6 +173,10 @@ public class page_ql_suatchieu extends JFrame {
         btnEdit.addActionListener(e -> editShowtime());
         btnDelete.addActionListener(e -> deleteShowtime());
         btnRefresh.addActionListener(e -> clearForm());
+        btnBack.addActionListener(e -> {
+            this.dispose();
+            new page_ql_menu().setVisible(true);
+        });
     }
 
     private void loadComboboxData() {
