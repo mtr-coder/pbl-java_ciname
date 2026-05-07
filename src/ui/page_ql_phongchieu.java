@@ -1,10 +1,10 @@
 package ui;
 
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.event.*;
 import java.sql.*;
 import java.util.Vector;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 
 public class page_ql_phongchieu extends JFrame {
     private JTable table;
@@ -12,7 +12,7 @@ public class page_ql_phongchieu extends JFrame {
     private JTextField txtId, txtName, txtSearch, txtTotalSeats;
     private JTable tableSeats;
     private DefaultTableModel tableModelSeats;
-    private JButton btnAdd, btnEdit, btnDelete, btnSearch, btnRefresh;
+    private JButton btnAdd, btnEdit, btnDelete, btnSearch, btnRefresh, btnUndo;
 
     public page_ql_phongchieu() {
         setTitle("Quản lý phòng chiếu");
@@ -102,6 +102,10 @@ public class page_ql_phongchieu extends JFrame {
         btnRefresh = new JButton("Làm mới / Tải lại");
         btnRefresh.setBounds(500, 430, 260, 30);
         add(btnRefresh);
+
+        btnUndo = new JButton("Quay lại");
+        btnUndo.setBounds(500, 470, 260, 30);
+        add(btnUndo);
 
         addEvents();
 
@@ -198,6 +202,12 @@ public class page_ql_phongchieu extends JFrame {
             txtSearch.setText("");
             clearForm();
             loadData("");
+        });
+
+        btnUndo.addActionListener(e -> {
+            this.dispose();
+            page_ql_menu menu = new page_ql_menu();
+            menu.setVisible(true);
         });
     }
 
